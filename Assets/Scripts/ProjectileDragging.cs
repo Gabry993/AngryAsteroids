@@ -22,6 +22,8 @@ public class ProjectileDragging : MonoBehaviour {
     private bool charging;
     private Vector2 prevVelocity;
     public float aimingMovement;
+    private float prevHapkitPosition;
+
     private void Awake()
     {
         spring = GetComponent<SpringJoint2D>();
@@ -38,7 +40,8 @@ public class ProjectileDragging : MonoBehaviour {
         aiming = true;
         charging = false;
         aimingMovement = 0.2f;
-        angle = (float)Math.Atan2(transform.position.y - catapult.position.y, transform.position.x - catapult.position.x);
+        angle = 4.7123f;//(float)Math.Atan2(transform.position.y - catapult.position.y, transform.position.x - catapult.position.x);
+        transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
     }
 	
 	// Update is called once per frame
@@ -46,24 +49,34 @@ public class ProjectileDragging : MonoBehaviour {
         if (aiming)
         {
             Aim();
-            if (Input.GetKeyDown("i") && !charging)
+            if (!charging)
             {
-                angle += 0.1f * speedScale;
+                //print(Globals.HapkitPosition);
+                angle = 3f + (Globals.HapkitPosition*17.84f);
                 transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float) Math.Cos(angle) * rad, 0);
+                prevHapkitPosition = Globals.HapkitPosition;
                 //transform.position = transform.position + new Vector3(0.0f, aimingMovement, 0.0f);
             }
-            if (Input.GetKeyDown("k") && !charging)
+            /*
+            if (1<0 && !charging)
             {
-                angle -= 0.1f * speedScale;
+                angle -= Globals.HapkitPosition * speedScale;
                 transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
                 transform.position = transform.position + new Vector3(0.0f, -aimingMovement, 0.0f); ;
-            }
+            }*/
                 
-            if (Input.GetKeyDown("j") && charging)
-                if ((transform.position - catapult.position).sqrMagnitude < maxStretchSqr)//to avoid moving on the circle while charging at the max
-                transform.position = transform.position + new Vector3(-aimingMovement, 0.0f, 0.0f);
-            if (Input.GetKeyDown("l") && charging)
-                transform.position = transform.position + new Vector3(aimingMovement, 0.0f, 0.0f);
+            if (charging)
+                if (prevHapkitPosition< Globals.HapkitPosition && (transform.position - catapult.position).sqrMagnitude < maxStretchSqr)//to avoid moving on the circle while charging at the max
+                {
+                    transform.position = transform.position + new Vector3(-aimingMovement, 0.0f, 0.0f);
+                    prevHapkitPosition = Globals.HapkitPosition;
+                }
+            if (charging)
+                if (prevHapkitPosition > Globals.HapkitPosition)//to avoid moving on the circle while charging at the max
+                {
+                    transform.position = transform.position + new Vector3(aimingMovement, 0.0f, 0.0f);
+                    prevHapkitPosition = Globals.HapkitPosition;
+                }
             Dragging();
             if (Input.GetKeyDown("c"))
                 charging = true;

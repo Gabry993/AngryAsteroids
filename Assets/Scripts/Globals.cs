@@ -2,6 +2,7 @@
 {
     private static int _mode;
     private static bool _exploded;
+    private static float _hapkitPosition;
 
     public static bool Exploded
     {
@@ -15,6 +16,20 @@
             // You can add logic here for race conditions,
             // or other measurements
             _exploded = value;
+        }
+    }
+    public static float HapkitPosition
+    {
+        get
+        {
+            // Reads are usually simple
+            return _hapkitPosition;
+        }
+        set
+        {
+            // You can add logic here for race conditions,
+            // or other measurements
+            _hapkitPosition = value;
         }
     }
 

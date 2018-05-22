@@ -16,6 +16,8 @@ public class HomingMissile : MonoBehaviour {
     public float Power;
     public float Radius;
 
+    private float prevHapkitPosition;
+
     // Use this for initialization
     void Start () {
         rb = GetComponent<Rigidbody2D>();
@@ -23,10 +25,18 @@ public class HomingMissile : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (Input.GetKeyDown("a"))
-            rotateSpeed += 25f;
-        if (Input.GetKeyDown("d"))
-            rotateSpeed -= 25f;
+        if (Globals.HapkitPosition>= 0f)
+        {
+            //print(Globals.HapkitPosition - 0.1f);
+            rotateSpeed = 500f* (Globals.HapkitPosition);
+            prevHapkitPosition = Globals.HapkitPosition;
+        }
+        if (Globals.HapkitPosition< 0f)
+        {
+            //print(Globals.HapkitPosition - 0.1f);
+            rotateSpeed = 500f* (Globals.HapkitPosition );
+            prevHapkitPosition = Globals.HapkitPosition;
+        }
         if (Input.GetKeyDown("up"))
         {
             rb.isKinematic = false;
@@ -58,7 +68,7 @@ public class HomingMissile : MonoBehaviour {
                 Rigidbody2D rib = hit.GetComponent<Rigidbody2D>();
                 if (rib != null)
                 {
-                    AddExplosionForce(rib, Power * 100, explosionPos, Radius);
+                    AddExplosionForce(rib, Power * 1000, explosionPos, Radius);
                 }
             }
             Instantiate(explosionEffect, transform.position, transform.rotation);
