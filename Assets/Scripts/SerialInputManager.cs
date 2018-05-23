@@ -51,6 +51,9 @@ public class SerialInputManager : Singleton<SerialInputManager> {
     private Queue<byte[]> msgQueue = new Queue<byte[]>();
     private List<byte> recvBuf = new List<byte>();
 
+
+    private int prevState;
+
     // on osx - ls /dev/cu* and choose usb modem
 	void Start () {
         this.port = "COM3";
@@ -63,6 +66,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
         //this.serial.WriteBufferSize =  2 * 1024 * 1024; 
         this.serial.Open();
         Debug.Assert(this.serial.IsOpen);
+        this.prevState = Globals.HapkitState;
         //WriteMessage(SendMessageType.Reset);
         Task.Factory.StartNew(() =>
         {
@@ -73,6 +77,24 @@ public class SerialInputManager : Singleton<SerialInputManager> {
             }
            
         });
+    }
+
+    void Update()
+    {
+        print("UPDATING");
+        //print(prevState);
+        int newstate = Globals.HapkitState;
+        //print(newstate);
+       
+        if (this.prevState != newstate){
+            this.prevState = newstate;
+            //print(newstate);
+            string str = String.Format("{0}\n", newstate);
+            print(str);
+            byte[] msg = System.Text.Encoding.ASCII.GetBytes(str);
+            Instance.serial.Write(msg, 0, msg.Length);
+        }
+
     }
 	
 	// Update is called once per frame
@@ -113,7 +135,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
             }
             this.recvBuf.Add(by);*/
             string msg = serial.ReadLine();
-            Debug.Log(msg);
+            //Debug.Log(msg);
             //this.serial.DiscardInBuffer();
             return msg;
         }
@@ -122,7 +144,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
 
             
     private void processIncomingMessage(string msg) {
-        Debug.Log(msg);
+        //Debug.Log(msg);
         if (msg.StartsWith(RecvMessageType.Prm.ToString())) {
             //Debug.Log("Params: " + msg);
             //this.timer = 0.0f;
@@ -133,7 +155,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
 
         }
         else if (msg.StartsWith(RecvMessageType.Ok.ToString())) {
-            //Debug.Log(msg);
+            Debug.Log(msg);
             //Debug.Log("Ack");
             this.timer = 0.0f;
             this.msgQueue.Dequeue();
@@ -157,6 +179,9 @@ public class SerialInputManager : Singleton<SerialInputManager> {
         this.msgQueue.Enqueue(message);
     }
 
+    
+
+
     public static void WriteMessage(SendMessageType type, params float[] param) {
         string flt = String.Format("{0:0.#####}", param[0] );
         string str = null;
@@ -165,8 +190,8 @@ public class SerialInputManager : Singleton<SerialInputManager> {
         //if (type == SendMessageType.Param1) { str = String.Format("{0} {1}\n", type.ToString(), param[0]); }
         //if (type == SendMessageType.Param2) { str = String.Format("{0} {1} {2}\n", type.ToString(), param[0], param[1]); }
         byte[] msg = System.Text.Encoding.ASCII.GetBytes(str);
-        Instance.AddToWriteQueue(msg);
-        Instance.SendNextMessageInQueue();
-        //Instance.serial.Write(msg, 0, msg.Length);
+        //Instance.AddToWriteQueue(msg);
+        //Instance.SendNextMessageInQueue();
+        Instance.serial.Write(msg, 0, msg.Length);
     }
 }
