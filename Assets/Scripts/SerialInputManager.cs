@@ -144,7 +144,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
 
             
     private void processIncomingMessage(string msg) {
-        //Debug.Log(msg);
+        Debug.Log(msg);
         if (msg.StartsWith(RecvMessageType.Prm.ToString())) {
             //Debug.Log("Params: " + msg);
             //this.timer = 0.0f;

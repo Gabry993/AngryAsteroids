@@ -20,6 +20,8 @@ public class ProjectileDragging : MonoBehaviour {
     private float angle;
     private bool aiming;
     private bool charging;
+    private float bla;
+    private Vector3 direction;
     private Vector2 prevVelocity;
     public float aimingMovement;
     private float prevHapkitPosition;
@@ -40,6 +42,7 @@ public class ProjectileDragging : MonoBehaviour {
         aiming = true;
         charging = false;
         aimingMovement = 0.2f;
+        bla = 0.2f;
         angle = 4.7123f;//(float)Math.Atan2(transform.position.y - catapult.position.y, transform.position.x - catapult.position.x);
         transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
     }
@@ -49,37 +52,96 @@ public class ProjectileDragging : MonoBehaviour {
         if (aiming)
         {
             Aim();
-            if (!charging)
+            if (Input.GetKeyDown("i") && !charging)
             {
+                angle += 0.1f * speedScale;
+                transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
+                /*
                 //print(Globals.HapkitPosition);
-                angle = 3f + (Globals.HapkitPosition*17.84f);
+                angle = 4.12f + (Globals.HapkitPosition*34.88f);
                 transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float) Math.Cos(angle) * rad, 0);
                 prevHapkitPosition = Globals.HapkitPosition;
                 //transform.position = transform.position + new Vector3(0.0f, aimingMovement, 0.0f);
+            */
+                }
+            if (Input.GetKeyDown("k") && !charging)
+            {
+                angle -= 0.1f * speedScale;
+                transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
+                transform.position = transform.position + new Vector3(0.0f, -aimingMovement, 0.0f); ;
             }
             /*
+             
             if (1<0 && !charging)
             {
                 angle -= Globals.HapkitPosition * speedScale;
                 transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
                 transform.position = transform.position + new Vector3(0.0f, -aimingMovement, 0.0f); ;
             }*/
-                
+            /*
             if (charging)
-                if (prevHapkitPosition< Globals.HapkitPosition && (transform.position - catapult.position).sqrMagnitude < maxStretchSqr)//to avoid moving on the circle while charging at the max
+                if ((transform.position - catapult.position).sqrMagnitude < maxStretchSqr)
                 {
-                    transform.position = transform.position + new Vector3(-aimingMovement, 0.0f, 0.0f);
-                    prevHapkitPosition = Globals.HapkitPosition;
+                    //transform.position = catapult.position + Vector3.Normalize(transform.position - catapult.position) * (Globals.HapkitPosition + 0.045f);
+
+                         transform.position = transform.position + new Vector3(catapult.position.x - Globals.HapkitPosition + 0.045f, 0.0f, 0.0f);
                 }
-            if (charging)
-                if (prevHapkitPosition > Globals.HapkitPosition)//to avoid moving on the circle while charging at the max
-                {
-                    transform.position = transform.position + new Vector3(aimingMovement, 0.0f, 0.0f);
-                    prevHapkitPosition = Globals.HapkitPosition;
-                }
+                  */
+
+            /*
+            if (prevHapkitPosition< Globals.HapkitPosition && (transform.position - catapult.position).sqrMagnitude < maxStretchSqr)//to avoid moving on the circle while charging at the max
+            {
+                transform.position = transform.position + new Vector3(-aimingMovement, 0.0f, 0.0f);
+                prevHapkitPosition = Globals.HapkitPosition;
+            }
+        if (charging)
+            if (prevHapkitPosition > Globals.HapkitPosition)//to avoid moving on the circle while charging at the max
+            {
+                transform.position = transform.position + new Vector3(aimingMovement, 0.0f, 0.0f);
+                prevHapkitPosition = Globals.HapkitPosition;
+            }*/
+            print(aimingMovement);      
+            if (Input.GetKeyDown("j") && charging)
+            {
+                //aimingMovement -= 0.1f;
+                //if (aimingMovement * aimingMovement < maxStretchSqr)  
+                //Debug.Log(catapult.position);
+                //Debug.Log(transform.position);
+                Debug.Log(transform.position - catapult.position);
+
+
+                // TODO make sure that catapult-transform.pos are never 0. Use clamp or something
+                //if (Vector3.Distance(catapult.position,transform.position)> aimingMovement + 0.01)
+                    transform.position = transform.position + (this.direction) * (aimingMovement);
+
+            
+            }
+            if (Input.GetKeyDown("l") && charging)
+            {
+                // aimingMovement += 0.1f;
+                // if (aimingMovement * aimingMovement < maxStretchSqr)
+                //transform.position = catapult.position + Vector3.Normalize(transform.position - catapult.position) * (aimingMovement);
+               // if (Vector3.Distance(catapult.position, transform.position) > aimingMovement + 0.01)
+                    transform.position = transform.position +(this.direction) * -(aimingMovement);
+
+            }
+            //transform.position = transform.position + new Vector3(aimingMovement, 0.0f, 0.0f);
+
+
+            //   if ((transform.position - catapult.position).sqrMagnitude < maxStretchSqr)//to avoid moving on the circle while charging at the max
+
+
+
+
             Dragging();
             if (Input.GetKeyDown("c"))
+            {
+                //Globals.HapkitState = 1;
                 charging = true;
+                direction = Vector3.Normalize(catapult.position - transform.position);
+
+
+            }
             if (Input.GetKeyDown("f"))
                 Fire();
            
