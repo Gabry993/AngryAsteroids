@@ -4,7 +4,22 @@
     private static int _hmode;
     private static bool _exploded;
     private static float _hapkitPosition;
+    private static bool _hapkit;
 
+        public static bool Hapkit
+    {
+        get
+        {
+            // Reads are usually simple
+            return _hapkit;
+        }
+        set
+        {
+            // You can add logic here for race conditions,
+            // or other measurements
+            _hapkit = value;
+        }
+    }
     public static bool Exploded
     {
         get

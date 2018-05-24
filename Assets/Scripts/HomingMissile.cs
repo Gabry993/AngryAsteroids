@@ -23,7 +23,7 @@ public class HomingMissile : MonoBehaviour {
         rb = GetComponent<Rigidbody2D>();
     }
 
-    /*
+
 	// Update is called once per frame
 	void Update () {
         if (Globals.HapkitPosition>= 0f)
@@ -41,7 +41,7 @@ public class HomingMissile : MonoBehaviour {
         if (Input.GetKeyDown("up"))
         {
             rb.isKinematic = false;
-            speed = 10f;
+            speed = 30f;
             rb.velocity = transform.right * speed;
         }
         if (Input.GetKeyDown("down"))
@@ -49,7 +49,7 @@ public class HomingMissile : MonoBehaviour {
             rotateSpeed = 0f;
             speed = 0f;
         }
-        float rotateAmount = 2f;
+        float rotateAmount = 5f;
         rb.angularVelocity = rotateAmount * rotateSpeed;
         if (speed > 0f)
             rb.velocity = transform.right * speed;
@@ -57,7 +57,8 @@ public class HomingMissile : MonoBehaviour {
             return;
       
     }
-    */
+   
+    /*
     void Update()
     {
         if (Input.GetKeyDown("a"))
@@ -83,6 +84,7 @@ public class HomingMissile : MonoBehaviour {
             return;
 
     }
+    */
     void OnTriggerEnter2D(Collider2D collider)
     {
         if (collider.tag != "EditorOnly")

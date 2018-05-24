@@ -56,11 +56,11 @@ public class SerialInputManager : Singleton<SerialInputManager> {
 
     // on osx - ls /dev/cu* and choose usb modem
 	void Start () {
-        this.port = "COM3";
+        this.port = "COM4";
         this.serial = new SerialPort(this.port);
         this.serial.RtsEnable = true;
-        //this.serial.BaudRate = 2000000; 
-        this.serial.BaudRate = 921600; 
+        this.serial.BaudRate = 2000000; 
+        //this.serial.BaudRate = 921600; 
         this.serial.ReadTimeout = 1000;
         //this.serial.ReadBufferSize =  2 * 1024 * 1024; 
         //this.serial.WriteBufferSize =  2 * 1024 * 1024; 
@@ -81,7 +81,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
 
     void Update()
     {
-        print("UPDATING");
+        //print("UPDATING");
         //print(prevState);
         int newstate = Globals.HapkitState;
         //print(newstate);
@@ -90,7 +90,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
             this.prevState = newstate;
             //print(newstate);
             string str = String.Format("{0}\n", newstate);
-            print(str);
+            //print(str);
             byte[] msg = System.Text.Encoding.ASCII.GetBytes(str);
             Instance.serial.Write(msg, 0, msg.Length);
         }
@@ -144,7 +144,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
 
             
     private void processIncomingMessage(string msg) {
-        Debug.Log(msg);
+        //Debug.Log(msg);
         if (msg.StartsWith(RecvMessageType.Prm.ToString())) {
             //Debug.Log("Params: " + msg);
             //this.timer = 0.0f;
@@ -155,7 +155,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
 
         }
         else if (msg.StartsWith(RecvMessageType.Ok.ToString())) {
-            Debug.Log(msg);
+            //Debug.Log(msg);
             //Debug.Log("Ack");
             this.timer = 0.0f;
             this.msgQueue.Dequeue();

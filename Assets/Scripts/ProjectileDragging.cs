@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ProjectileDragging : MonoBehaviour {
 
-    public float maxStretch = 3.0f;
+    public float maxStretch = 5.0f;
     public LineRenderer catapultLineFront;
     public LineRenderer catapultLineBack;
 
@@ -49,102 +49,132 @@ public class ProjectileDragging : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if (aiming)
+        if (Globals.Hapkit)
         {
-            Aim();
-            if (Input.GetKeyDown("i") && !charging)
+            if (aiming)
             {
-                angle += 0.1f * speedScale;
-                transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
-                /*
-                //print(Globals.HapkitPosition);
-                angle = 4.12f + (Globals.HapkitPosition*34.88f);
-                transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float) Math.Cos(angle) * rad, 0);
-                prevHapkitPosition = Globals.HapkitPosition;
-                //transform.position = transform.position + new Vector3(0.0f, aimingMovement, 0.0f);
-            */
-                }
-            if (Input.GetKeyDown("k") && !charging)
-            {
-                angle -= 0.1f * speedScale;
-                transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
-                transform.position = transform.position + new Vector3(0.0f, -aimingMovement, 0.0f); ;
-            }
-            /*
-             
-            if (1<0 && !charging)
-            {
-                angle -= Globals.HapkitPosition * speedScale;
-                transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
-                transform.position = transform.position + new Vector3(0.0f, -aimingMovement, 0.0f); ;
-            }*/
-            /*
-            if (charging)
-                if ((transform.position - catapult.position).sqrMagnitude < maxStretchSqr)
+                Aim();
+                if (!charging)
                 {
-                    //transform.position = catapult.position + Vector3.Normalize(transform.position - catapult.position) * (Globals.HapkitPosition + 0.045f);
-
-                         transform.position = transform.position + new Vector3(catapult.position.x - Globals.HapkitPosition + 0.045f, 0.0f, 0.0f);
+                    angle = 4.12f + (Globals.HapkitPosition * 34.88f);
+                    transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
                 }
-                  */
+                if (charging)
+                {
+                    // TODO make sure that catapult-transform.pos are never 0. Use clamp or something
+                    //if (Vector3.Distance(catapult.position,transform.position)> aimingMovement + 0.01)
+                    transform.position = catapult.position + (this.direction) * 100f*(Globals.HapkitPosition-0.045f);
+                }
+                Dragging();
+                if (Input.GetKeyDown("c"))
+                {
+                    Globals.HapkitState = 1;
+                    charging = true;
+                    direction = Vector3.Normalize(catapult.position - transform.position);
 
-            /*
-            if (prevHapkitPosition< Globals.HapkitPosition && (transform.position - catapult.position).sqrMagnitude < maxStretchSqr)//to avoid moving on the circle while charging at the max
-            {
-                transform.position = transform.position + new Vector3(-aimingMovement, 0.0f, 0.0f);
-                prevHapkitPosition = Globals.HapkitPosition;
+
+                }
+                if (Input.GetKeyDown("f"))
+                    Fire();
             }
-        if (charging)
-            if (prevHapkitPosition > Globals.HapkitPosition)//to avoid moving on the circle while charging at the max
+        }
+        else {
+            if (aiming)
             {
-                transform.position = transform.position + new Vector3(aimingMovement, 0.0f, 0.0f);
-                prevHapkitPosition = Globals.HapkitPosition;
-            }*/
-            print(aimingMovement);      
-            if (Input.GetKeyDown("j") && charging)
-            {
-                //aimingMovement -= 0.1f;
-                //if (aimingMovement * aimingMovement < maxStretchSqr)  
-                //Debug.Log(catapult.position);
-                //Debug.Log(transform.position);
-                Debug.Log(transform.position - catapult.position);
+                Aim();
+                if (Input.GetKeyDown("i") && !charging)
+                {
+                    angle += 0.1f * speedScale;
+                    transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
+                    /*
+                    //print(Globals.HapkitPosition);
+                    angle = 4.12f + (Globals.HapkitPosition*34.88f);
+                    transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float) Math.Cos(angle) * rad, 0);
+                    prevHapkitPosition = Globals.HapkitPosition;
+                    //transform.position = transform.position + new Vector3(0.0f, aimingMovement, 0.0f);
+                */
+                }
+                if (Input.GetKeyDown("k") && !charging)
+                {
+                    angle -= 0.1f * speedScale;
+                    transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
+                    transform.position = transform.position + new Vector3(0.0f, -aimingMovement, 0.0f); ;
+                }
+                /*
+
+                if (1<0 && !charging)
+                {
+                    angle -= Globals.HapkitPosition * speedScale;
+                    transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
+                    transform.position = transform.position + new Vector3(0.0f, -aimingMovement, 0.0f); ;
+                }*/
+                /*
+                if (charging)
+                    if ((transform.position - catapult.position).sqrMagnitude < maxStretchSqr)
+                    {
+                        //transform.position = catapult.position + Vector3.Normalize(transform.position - catapult.position) * (Globals.HapkitPosition + 0.045f);
+
+                             transform.position = transform.position + new Vector3(catapult.position.x - Globals.HapkitPosition + 0.045f, 0.0f, 0.0f);
+                    }
+                      */
+
+                /*
+                if (prevHapkitPosition< Globals.HapkitPosition && (transform.position - catapult.position).sqrMagnitude < maxStretchSqr)//to avoid moving on the circle while charging at the max
+                {
+                    transform.position = transform.position + new Vector3(-aimingMovement, 0.0f, 0.0f);
+                    prevHapkitPosition = Globals.HapkitPosition;
+                }
+            if (charging)
+                if (prevHapkitPosition > Globals.HapkitPosition)//to avoid moving on the circle while charging at the max
+                {
+                    transform.position = transform.position + new Vector3(aimingMovement, 0.0f, 0.0f);
+                    prevHapkitPosition = Globals.HapkitPosition;
+                }*/
+                //print(aimingMovement);      
+                if (Input.GetKeyDown("j") && charging)
+                {
+                    //aimingMovement -= 0.1f;
+                    //if (aimingMovement * aimingMovement < maxStretchSqr)  
+                    //Debug.Log(catapult.position);
+                    //Debug.Log(transform.position);
+                    Debug.Log(transform.position - catapult.position);
 
 
-                // TODO make sure that catapult-transform.pos are never 0. Use clamp or something
-                //if (Vector3.Distance(catapult.position,transform.position)> aimingMovement + 0.01)
+                    // TODO make sure that catapult-transform.pos are never 0. Use clamp or something
+                    //if (Vector3.Distance(catapult.position,transform.position)> aimingMovement + 0.01)
                     transform.position = transform.position + (this.direction) * (aimingMovement);
 
-            
+
+                }
+                if (Input.GetKeyDown("l") && charging)
+                {
+                    // aimingMovement += 0.1f;
+                    // if (aimingMovement * aimingMovement < maxStretchSqr)
+                    //transform.position = catapult.position + Vector3.Normalize(transform.position - catapult.position) * (aimingMovement);
+                    // if (Vector3.Distance(catapult.position, transform.position) > aimingMovement + 0.01)
+                    transform.position = transform.position + (this.direction) * -(aimingMovement);
+
+                }
+                //transform.position = transform.position + new Vector3(aimingMovement, 0.0f, 0.0f);
+
+
+                //   if ((transform.position - catapult.position).sqrMagnitude < maxStretchSqr)//to avoid moving on the circle while charging at the max
+
+
+
+
+                Dragging();
+                if (Input.GetKeyDown("c"))
+                {
+                    //Globals.HapkitState = 1;
+                    charging = true;
+                    direction = Vector3.Normalize(catapult.position - transform.position);
+
+
+                }
+                if (Input.GetKeyDown("f"))
+                    Fire();
             }
-            if (Input.GetKeyDown("l") && charging)
-            {
-                // aimingMovement += 0.1f;
-                // if (aimingMovement * aimingMovement < maxStretchSqr)
-                //transform.position = catapult.position + Vector3.Normalize(transform.position - catapult.position) * (aimingMovement);
-               // if (Vector3.Distance(catapult.position, transform.position) > aimingMovement + 0.01)
-                    transform.position = transform.position +(this.direction) * -(aimingMovement);
-
-            }
-            //transform.position = transform.position + new Vector3(aimingMovement, 0.0f, 0.0f);
-
-
-            //   if ((transform.position - catapult.position).sqrMagnitude < maxStretchSqr)//to avoid moving on the circle while charging at the max
-
-
-
-
-            Dragging();
-            if (Input.GetKeyDown("c"))
-            {
-                //Globals.HapkitState = 1;
-                charging = true;
-                direction = Vector3.Normalize(catapult.position - transform.position);
-
-
-            }
-            if (Input.GetKeyDown("f"))
-                Fire();
-           
         }
         if (spring != null)
         {
