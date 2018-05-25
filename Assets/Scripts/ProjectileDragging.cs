@@ -63,7 +63,7 @@ public class ProjectileDragging : MonoBehaviour {
                 {
                     // TODO make sure that catapult-transform.pos are never 0. Use clamp or something
                     //if (Vector3.Distance(catapult.position,transform.position)> aimingMovement + 0.01)
-                    transform.position = catapult.position + (this.direction) * 100f*(Globals.HapkitPosition-0.045f);
+                    transform.position = catapult.position + (this.direction) * 50f*(Globals.HapkitPosition-0.045f);
                 }
                 Dragging();
                 if (Input.GetKeyDown("c"))
@@ -76,6 +76,24 @@ public class ProjectileDragging : MonoBehaviour {
                 }
                 if (Input.GetKeyDown("f"))
                     Fire();
+                /*if (charging)
+                {
+                    float pos_avg = 0f;
+                    float acc_avg = 0f;
+                    foreach (var couple in Globals.ToFireQueue)
+                    {
+                        pos_avg += couple.position;
+                        acc_avg += couple.acceleration;
+                    }
+                    pos_avg /= (float)Globals.ToFireQueue.Count;
+                    acc_avg /= (float)Globals.ToFireQueue.Count;
+                    //print(pos_avg);
+                    print(acc_avg);
+                    if (acc_avg > -0.4f)
+                    {
+                        Fire();
+                    }
+                }*/
             }
         }
         else {
@@ -137,7 +155,7 @@ public class ProjectileDragging : MonoBehaviour {
                     //if (aimingMovement * aimingMovement < maxStretchSqr)  
                     //Debug.Log(catapult.position);
                     //Debug.Log(transform.position);
-                    Debug.Log(transform.position - catapult.position);
+                    //Debug.Log(transform.position - catapult.position);
 
 
                     // TODO make sure that catapult-transform.pos are never 0. Use clamp or something

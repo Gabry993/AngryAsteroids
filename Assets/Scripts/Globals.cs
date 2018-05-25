@@ -1,12 +1,34 @@
-﻿public class Globals
+﻿using System.Collections.Generic;
+public struct Couple
+{
+    public float position;
+    public float acceleration;
+}
+
+public class Globals
 {
     private static int _mode;
     private static int _hmode;
     private static bool _exploded;
     private static float _hapkitPosition;
     private static bool _hapkit;
+    private static Queue<Couple> _toFireQueue = new Queue<Couple>();
 
-        public static bool Hapkit
+    public static Queue<Couple> ToFireQueue
+    {
+        get
+        {
+            // Reads are usually simple
+            return _toFireQueue;
+        }
+        set
+        {
+            // You can add logic here for race conditions,
+            // or other measurements
+            _toFireQueue = value;
+        }
+    }
+    public static bool Hapkit
     {
         get
         {

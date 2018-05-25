@@ -151,7 +151,16 @@ public class SerialInputManager : Singleton<SerialInputManager> {
             char[] whitespace = new char[] { ' ', '\t' };
             string[] words = msg.Split(whitespace);
             //string[] words = msg.Split(' ');
-            Globals.HapkitPosition = float.Parse(words[1].Replace('.', ','));
+            float pos = float.Parse(words[1].Replace('.', ','));
+            Globals.HapkitPosition = pos;
+            /*Couple couple = new Couple();
+            couple.position = pos;
+            couple.acceleration = float.Parse(words[3].Replace('.', ','));
+            if (Globals.ToFireQueue.Count > 10)
+            {
+                Globals.ToFireQueue.Dequeue();
+            }
+            Globals.ToFireQueue.Enqueue(couple);*/
 
         }
         else if (msg.StartsWith(RecvMessageType.Ok.ToString())) {

@@ -87,7 +87,7 @@ public class HomingMissile : MonoBehaviour {
     */
     void OnTriggerEnter2D(Collider2D collider)
     {
-        if (collider.tag != "EditorOnly")
+        if (collider.tag != "GameController")
         {
             Vector3 explosionPos = transform.position;
             Collider2D[] colliders = Physics2D.OverlapCircleAll(explosionPos, Radius);
