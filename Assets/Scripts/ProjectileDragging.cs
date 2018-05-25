@@ -71,8 +71,7 @@ public class ProjectileDragging : MonoBehaviour {
                     Globals.HapkitState = 1;
                     charging = true;
                     direction = Vector3.Normalize(catapult.position - transform.position);
-
-
+                    SerialInputManager.SetState(Globals.HapkitState);
                 }
                 if (Input.GetKeyDown("f"))
                     Fire();
@@ -187,8 +186,6 @@ public class ProjectileDragging : MonoBehaviour {
                     //Globals.HapkitState = 1;
                     charging = true;
                     direction = Vector3.Normalize(catapult.position - transform.position);
-
-
                 }
                 if (Input.GetKeyDown("f"))
                     Fire();

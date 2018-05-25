@@ -18,11 +18,7 @@ public sealed class SendMessageType {
         return this.method;
     } 
 
-    public static readonly SendMessageType Param1 = new SendMessageType("P1");
-    public static readonly SendMessageType Param2 = new SendMessageType("P2");
-    public static readonly SendMessageType Params = new SendMessageType("PRM");
-    public static readonly SendMessageType Reset  = new SendMessageType("RS");
-    public static readonly SendMessageType Live   = new SendMessageType("LV");
+    public static readonly SendMessageType Param1 = new SendMessageType("CS");
 }
 
 public sealed class RecvMessageType {
@@ -52,7 +48,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
     private List<byte> recvBuf = new List<byte>();
 
 
-    private int prevState;
+    private int expectedState;
 
     // on osx - ls /dev/cu* and choose usb modem
 	void Start () {
@@ -66,7 +62,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
         //this.serial.WriteBufferSize =  2 * 1024 * 1024; 
         this.serial.Open();
         Debug.Assert(this.serial.IsOpen);
-        this.prevState = Globals.HapkitState;
+        this.expectedState = Globals.HapkitState;
         //WriteMessage(SendMessageType.Reset);
         Task.Factory.StartNew(() =>
         {
@@ -81,78 +77,52 @@ public class SerialInputManager : Singleton<SerialInputManager> {
 
     void Update()
     {
-        //print("UPDATING");
-        //print(prevState);
-        int newstate = Globals.HapkitState;
-        //print(newstate);
-       
-        if (this.prevState != newstate){
-            this.prevState = newstate;
-            //print(newstate);
-            string str = String.Format("{0}\n", newstate);
-            //print(str);
-            byte[] msg = System.Text.Encoding.ASCII.GetBytes(str);
+        if (this.msgQueue.Count > 0) {
+            byte[] msg = this.msgQueue.Peek();
             Instance.serial.Write(msg, 0, msg.Length);
         }
-
     }
 	
 	// Update is called once per frame
 	void ThreadUpdate () {
         try {
-            string msg = this.readIncomingMessage();
-            if (msg != null) {
+            this.serial.NewLine = "\n";
+            if (this.serial.BytesToRead > 0)  {
+                string msg = serial.ReadLine();
                 processIncomingMessage(msg);
-                //Debug.Log(msg);
             }
         }
         catch (TimeoutException ex) {
             // this never triggers wat
             Debug.Log("Didn't receive anything from Arduino!"); 
         }
-
-        // update timer 
-        /*this.timer += Time.deltaTime;
-        if (this.timer >= Timeout) {
-            this.SendNextMessageInQueue();
-            this.timer = 0.0f;
-        }*/
-	}
-
-    private string readIncomingMessage()  {
-        //Debug.Log(this.recvBuf.Count);
-        //Debug.Log(this.serial.BytesToRead);
-        serial.NewLine = "\n";
-        while (this.serial.BytesToRead > 0) {
-            /*
-            int chr = this.serial.ReadByte();
-            byte by = Convert.ToByte(chr);
-            if (by == '\n') {
-            //if (this.recvBuf.Count > 10) {
-                string msg = System.Text.Encoding.Default.GetString(this.recvBuf.ToArray());
-                this.recvBuf.Clear();
-                return msg;
-            }
-            this.recvBuf.Add(by);*/
-            string msg = serial.ReadLine();
-            //Debug.Log(msg);
-            //this.serial.DiscardInBuffer();
-            return msg;
-        }
-        return null;
     }
 
-            
     private void processIncomingMessage(string msg) {
-        //Debug.Log(msg);
         if (msg.StartsWith(RecvMessageType.Prm.ToString())) {
             //Debug.Log("Params: " + msg);
             //this.timer = 0.0f;
             char[] whitespace = new char[] { ' ', '\t' };
             string[] words = msg.Split(whitespace);
-            //string[] words = msg.Split(' ');
-            float pos = float.Parse(words[1].Replace('.', ','));
-            Globals.HapkitPosition = pos;
+
+            float position  = float.Parse(words[1]);
+            float velocity =  float.Parse(words[2]);
+            float acceleration =  float.Parse(words[3]);
+            int state =  int.Parse(words[4]);
+
+
+
+            Globals.HapkitPosition = position;
+
+            if (this.expectedState != state) {
+                string str = String.Format("State {0}\n",  this.expectedState); 
+                byte[] snd = System.Text.Encoding.ASCII.GetBytes(str);
+                this.serial.Write(snd, 0, snd.Length);
+            } else {
+                Globals.HapkitState = state;
+            }
+
+
             /*Couple couple = new Couple();
             couple.position = pos;
             couple.acceleration = float.Parse(words[3].Replace('.', ','));
@@ -161,46 +131,12 @@ public class SerialInputManager : Singleton<SerialInputManager> {
                 Globals.ToFireQueue.Dequeue();
             }
             Globals.ToFireQueue.Enqueue(couple);*/
-
-        }
-        else if (msg.StartsWith(RecvMessageType.Ok.ToString())) {
-            //Debug.Log(msg);
-            //Debug.Log("Ack");
-            this.timer = 0.0f;
-            this.msgQueue.Dequeue();
-            this.SendNextMessageInQueue();
         }
         else {
             Debug.Log("bad");
-            //Debug.Log(msg);
         }
     }
-
-    private void SendNextMessageInQueue() {
-        if (this.msgQueue.Count > 0) {
-            byte[] msg = this.msgQueue.Peek();
-            Debug.Log("snd");
-            this.serial.Write(msg, 0, msg.Length);
-        }
-    }
-
-    public void AddToWriteQueue(byte[] message) {
-        this.msgQueue.Enqueue(message);
-    }
-
-    
-
-
-    public static void WriteMessage(SendMessageType type, params float[] param) {
-        string flt = String.Format("{0:0.#####}", param[0] );
-        string str = null;
-        if (type == SendMessageType.Param1)   { str = String.Format("{0} {1}\n", type.ToString(), flt); }
-        //if (type == SendMessageType.Reset)  { str = String.Format("{0}\n", type.ToString()); }
-        //if (type == SendMessageType.Param1) { str = String.Format("{0} {1}\n", type.ToString(), param[0]); }
-        //if (type == SendMessageType.Param2) { str = String.Format("{0} {1} {2}\n", type.ToString(), param[0], param[1]); }
-        byte[] msg = System.Text.Encoding.ASCII.GetBytes(str);
-        //Instance.AddToWriteQueue(msg);
-        //Instance.SendNextMessageInQueue();
-        Instance.serial.Write(msg, 0, msg.Length);
+    public static void SetState(int state) {
+        Instance.expectedState = state;
     }
 }
