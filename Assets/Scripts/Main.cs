@@ -12,10 +12,12 @@ public class Main : MonoBehaviour {
     // Use this for initialization
     void Start () {
         Globals.Mode = 0;
-        Globals.HapkitState = 0; 
+        //Globals.HapkitState = 0;
+        SerialInputManager.SetState(0);
         Globals.Exploded = false;
         rocket.SetActive(false);
         Globals.Hapkit = true;
+        Globals.ReleaseToFire = false;
 	}
 	    
 	// Update is called once per frame
@@ -29,7 +31,8 @@ public class Main : MonoBehaviour {
         if (Input.GetKeyDown("p"))
         {
             Globals.Mode = 1;
-            Globals.HapkitState = 2;
+            //Globals.HapkitState = 2;
+            SerialInputManager.SetState(2);
             asteroid.SetActive(false);
             catapult.SetActive(false);
             rocket.SetActive(true);
@@ -37,7 +40,8 @@ public class Main : MonoBehaviour {
         if (Input.GetKeyDown("o"))
         {
             Globals.Mode = 0;
-            Globals.HapkitState = 0;
+            //Globals.HapkitState = 0;
+            SerialInputManager.SetState(0);
             asteroid.SetActive(true);
             catapult.SetActive(true);
             rocket.SetActive(false);

@@ -63,6 +63,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
         this.serial.Open();
         Debug.Assert(this.serial.IsOpen);
         this.expectedState = Globals.HapkitState;
+        print(expectedState);
         //WriteMessage(SendMessageType.Reset);
         Task.Factory.StartNew(() =>
         {
@@ -105,35 +106,38 @@ public class SerialInputManager : Singleton<SerialInputManager> {
             char[] whitespace = new char[] { ' ', '\t' };
             string[] words = msg.Split(whitespace);
 
-            float position  = float.Parse(words[1]);
-            float velocity =  float.Parse(words[2]);
-            float acceleration =  float.Parse(words[3]);
-            int state =  int.Parse(words[4]);
+            float position  = float.Parse(words[1].Replace(".", ","));
+            float velocity =  float.Parse(words[2].Replace(".", ","));
+            float acceleration =  float.Parse(words[3].Replace(".", ","));
+            int state =  int.Parse(words[5]);
 
 
 
             Globals.HapkitPosition = position;
 
             if (this.expectedState != state) {
-                string str = String.Format("State {0}\n",  this.expectedState); 
+                string str = String.Format("{0}\n",  this.expectedState); 
                 byte[] snd = System.Text.Encoding.ASCII.GetBytes(str);
                 this.serial.Write(snd, 0, snd.Length);
             } else {
                 Globals.HapkitState = state;
             }
 
-
-            /*Couple couple = new Couple();
-            couple.position = pos;
-            couple.acceleration = float.Parse(words[3].Replace('.', ','));
+            
+            Triple triple = new Triple();
+            triple.position = position;
+            triple.velocity = velocity;
+            triple.acceleration = acceleration;
+            //print(triple.position + " " + triple.velocity + " " + triple.acceleration);
             if (Globals.ToFireQueue.Count > 10)
             {
                 Globals.ToFireQueue.Dequeue();
             }
-            Globals.ToFireQueue.Enqueue(couple);*/
+            Globals.ToFireQueue.Enqueue(triple);
         }
         else {
-            Debug.Log("bad");
+            //Debug.Log("bad");
+            //Debug.Log(msg);
         }
     }
     public static void SetState(int state) {

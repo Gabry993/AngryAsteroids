@@ -11,10 +11,16 @@ public class ProjectileFollow : MonoBehaviour {
     public Transform farRight;
     public Transform farDown;
     public Transform farUp;
+    public Transform secondCameraPlane;
 
 
     // Update is called once per frame
+    void LateUpdate()
+    {
+        secondCameraPlane.position = new Vector3(transform.position.x + 14, transform.position.y + 6.5f, 0);
+    }
     void Update () {
+        //
         if (projectile == null)
             return;
         if (Globals.Mode == 1)

@@ -89,6 +89,7 @@ public class HomingMissile : MonoBehaviour {
     {
         if (collider.tag != "GameController")
         {
+            SerialInputManager.SetState(3);
             Vector3 explosionPos = transform.position;
             Collider2D[] colliders = Physics2D.OverlapCircleAll(explosionPos, Radius);
             foreach (Collider2D hit in colliders)

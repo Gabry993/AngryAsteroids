@@ -42,7 +42,10 @@ public class Resetter : MonoBehaviour {
         if (Globals.Mode == 1 && Globals.Exploded)
         {
             frameAfterExplosion++;
-            if (frameAfterExplosion > 500)
+           
+            if (frameAfterExplosion == 50)
+                SerialInputManager.SetState(0);
+            if (frameAfterExplosion > 200)
                 Reset();
         }
     }

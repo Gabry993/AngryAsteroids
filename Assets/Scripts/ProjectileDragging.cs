@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class ProjectileDragging : MonoBehaviour {
 
-    public float maxStretch = 5.0f;
+    public float maxStretch = 0.0f;
     public LineRenderer catapultLineFront;
     public LineRenderer catapultLineBack;
 
@@ -25,6 +25,9 @@ public class ProjectileDragging : MonoBehaviour {
     private Vector2 prevVelocity;
     public float aimingMovement;
     private float prevHapkitPosition;
+    private int frameToPos = 0;
+    private string movingState = "not moving";
+    private string previousState = "not moving";
 
     private void Awake()
     {
@@ -56,25 +59,63 @@ public class ProjectileDragging : MonoBehaviour {
                 Aim();
                 if (!charging)
                 {
-                    angle = 4.12f + (Globals.HapkitPosition * 34.88f);
+                    angle = 4.12f + ((Globals.HapkitPosition + 0.045f) * 34.88f);
                     transform.position = new Vector3(catapult.position.x + (float)Math.Sin(angle) * rad, catapult.position.y + (float)Math.Cos(angle) * rad, 0);
                 }
                 if (charging)
                 {
                     // TODO make sure that catapult-transform.pos are never 0. Use clamp or something
                     //if (Vector3.Distance(catapult.position,transform.position)> aimingMovement + 0.01)
-                    transform.position = catapult.position + (this.direction) * 50f*(Globals.HapkitPosition-0.045f);
+                    transform.position = catapult.position + (this.direction) * 25f*(Globals.HapkitPosition-0.045f);
                 }
                 Dragging();
                 if (Input.GetKeyDown("c"))
                 {
-                    Globals.HapkitState = 1;
+                    //Globals.HapkitState = 1;
                     charging = true;
                     direction = Vector3.Normalize(catapult.position - transform.position);
-                    SerialInputManager.SetState(Globals.HapkitState);
+                    SerialInputManager.SetState(1);
                 }
-                if (Input.GetKeyDown("f"))
+                if (Input.GetKeyDown("f") && !Globals.ReleaseToFire)
                     Fire();
+                if (charging && Globals.ReleaseToFire && frameToPos>=150)
+                {
+                    float pos_avg = 0f;
+                    float acc_avg = 0f;
+                    float vel_avg = 0f;
+                    foreach (var triple in Globals.ToFireQueue)
+                    {
+                        pos_avg += triple.position;
+                        acc_avg += triple.acceleration* triple.acceleration;
+                        vel_avg += triple.velocity*triple.velocity;
+                    }
+                    pos_avg /= (float)Globals.ToFireQueue.Count;
+                    acc_avg = (float)Math.Sqrt(acc_avg) / (float)Globals.ToFireQueue.Count;
+                    vel_avg = (float)Math.Sqrt(vel_avg) / (float)Globals.ToFireQueue.Count;
+                    //print(pos_avg);
+                   // print(acc_avg);
+                    if (vel_avg < 0.001)
+                    {
+                        movingState = "not moving";
+                    }
+                    else
+                        movingState = "moving";
+                    //print(movingState + " " + vel_avg);
+                    //print(acc_avg);
+                    if (acc_avg > 0.17)
+                    {
+                        //print("released");
+                        Fire();
+                    }
+                    else
+                        print("hold");
+                    previousState = movingState;
+                }
+                else if (charging && Globals.ReleaseToFire && frameToPos < 200)
+                {
+                    frameToPos++;
+                    print(frameToPos);
+                }
                 /*if (charging)
                 {
                     float pos_avg = 0f;
@@ -159,7 +200,7 @@ public class ProjectileDragging : MonoBehaviour {
 
                     // TODO make sure that catapult-transform.pos are never 0. Use clamp or something
                     //if (Vector3.Distance(catapult.position,transform.position)> aimingMovement + 0.01)
-                    transform.position = transform.position + (this.direction) * (aimingMovement);
+                    transform.position = transform.position + (this.direction) * -(aimingMovement);
 
 
                 }
@@ -169,7 +210,7 @@ public class ProjectileDragging : MonoBehaviour {
                     // if (aimingMovement * aimingMovement < maxStretchSqr)
                     //transform.position = catapult.position + Vector3.Normalize(transform.position - catapult.position) * (aimingMovement);
                     // if (Vector3.Distance(catapult.position, transform.position) > aimingMovement + 0.01)
-                    transform.position = transform.position + (this.direction) * -(aimingMovement);
+                    transform.position = transform.position + (this.direction) * (aimingMovement);
 
                 }
                 //transform.position = transform.position + new Vector3(aimingMovement, 0.0f, 0.0f);
@@ -231,6 +272,7 @@ public class ProjectileDragging : MonoBehaviour {
 
     private void Fire()
     {
+        SerialInputManager.SetState(0);
         spring.enabled = true;
         GetComponent<Rigidbody2D>().isKinematic = false;
         aiming = false;
@@ -241,8 +283,8 @@ public class ProjectileDragging : MonoBehaviour {
         Vector2 catapultToMouse = asteroidPosition - catapult.position;
         if (catapultToMouse.sqrMagnitude > maxStretchSqr)
         {
-            rayToMouse.direction = catapultToMouse;
-            asteroidPosition = rayToMouse.GetPoint(maxStretch);
+            //rayToMouse.direction = catapultToMouse;
+            //asteroidPosition = rayToMouse.GetPoint(maxStretch);
         }
 
         asteroidPosition.z = 0f;

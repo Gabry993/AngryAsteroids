@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
-public struct Couple
+public struct Triple
 {
     public float position;
+    public float velocity;
     public float acceleration;
 }
 
@@ -12,9 +13,10 @@ public class Globals
     private static bool _exploded;
     private static float _hapkitPosition;
     private static bool _hapkit;
-    private static Queue<Couple> _toFireQueue = new Queue<Couple>();
+    private static bool _releaseToFire;
+    private static Queue<Triple> _toFireQueue = new Queue<Triple>();
 
-    public static Queue<Couple> ToFireQueue
+    public static Queue<Triple> ToFireQueue
     {
         get
         {
@@ -26,6 +28,20 @@ public class Globals
             // You can add logic here for race conditions,
             // or other measurements
             _toFireQueue = value;
+        }
+    }
+    public static bool ReleaseToFire
+    {
+        get
+        {
+            // Reads are usually simple
+            return _releaseToFire;
+        }
+        set
+        {
+            // You can add logic here for race conditions,
+            // or other measurements
+            _releaseToFire = value;
         }
     }
     public static bool Hapkit
