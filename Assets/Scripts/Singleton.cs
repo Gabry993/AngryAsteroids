@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO.Ports;
 
+/*
+    Useful class to implement a singleton object in Unity
+*/
 public class Singleton<T>: MonoBehaviour where T: Component {
 
 

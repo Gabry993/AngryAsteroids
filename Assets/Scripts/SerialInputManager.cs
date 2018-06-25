@@ -36,6 +36,11 @@ public sealed class RecvMessageType {
     public static readonly RecvMessageType Ok  = new RecvMessageType("Ok");
 }
 
+/*
+    Singleton Serial Input Manager.
+    Here we receive messages from the hapkit.
+    Here we send messages to the hapkit to set the state (and thus select the right feedback)
+*/
 public class SerialInputManager : Singleton<SerialInputManager> {
 
     static readonly float Timeout = 0.5f;
@@ -52,7 +57,7 @@ public class SerialInputManager : Singleton<SerialInputManager> {
 
     // on osx - ls /dev/cu* and choose usb modem
 	void Start () {
-        this.port = "COM4";
+        this.port = "COM4"; //THIS IS PC DEPENDANT (sometimes also changing usb port may change the port name, sometimes no on my Windows !wat!)
         this.serial = new SerialPort(this.port);
         this.serial.RtsEnable = true;
         this.serial.BaudRate = 2000000; 
@@ -62,9 +67,12 @@ public class SerialInputManager : Singleton<SerialInputManager> {
         //this.serial.WriteBufferSize =  2 * 1024 * 1024; 
         this.serial.Open();
         Debug.Assert(this.serial.IsOpen);
-        this.expectedState = Globals.HapkitState;
+        this.expectedState = Globals.HapkitState;   //this is the state we expect to see from the hapkit (so, it's the state of the game that we want to set)
         print(expectedState);
         //WriteMessage(SendMessageType.Reset);
+        /*
+            Nice and easy way to run a task NOT on unity thread. Fundamental to make communication working 
+        */
         Task.Factory.StartNew(() =>
         {
             while (true)
@@ -84,7 +92,9 @@ public class SerialInputManager : Singleton<SerialInputManager> {
         }
     }
 	
-	// Update is called once per frame
+	/*
+        Read lines sent by the Hapkit and process them when they are terminated.
+    */
 	void ThreadUpdate () {
         try {
             this.serial.NewLine = "\n";
@@ -99,6 +109,11 @@ public class SerialInputManager : Singleton<SerialInputManager> {
         }
     }
 
+    /*
+        Process/parse incoming messages.
+        Stores values useful to detect the release to fire event. -> Maybe could be refactored in its own method?
+        Check if the state we get from hapkit matches the expected state. If not, try to send a message to set the expected state on the hapkit.  -> Maybe could be refactored in its own method?
+    */
     private void processIncomingMessage(string msg) {
         if (msg.StartsWith(RecvMessageType.Prm.ToString())) {
             //Debug.Log("Params: " + msg);
@@ -106,15 +121,20 @@ public class SerialInputManager : Singleton<SerialInputManager> {
             char[] whitespace = new char[] { ' ', '\t' };
             string[] words = msg.Split(whitespace);
 
-            float position  = float.Parse(words[1].Replace(".", ","));
+            float position  = float.Parse(words[1].Replace(".", ",")); //Regions related: on italian systems floats want comma. Otherwise, the parser would simply drop the part after the number without warning you
             float velocity =  float.Parse(words[2].Replace(".", ","));
             float acceleration =  float.Parse(words[3].Replace(".", ","));
             int state =  int.Parse(words[5]);
 
 
 
-            Globals.HapkitPosition = position;
+            Globals.HapkitPosition = position; //save the position globally as its used to "move" the game
 
+            /*
+                Check if the state we get from hapkit matches the expected state. 
+                If not, try to send a message to set the expected state on the hapkit.
+                In that way we are sure that the state of the hapkit (i.e. the feedback produced) will match the game one in a reasonable time (user perceives it as in real time, so it works fine enough)
+            */
             if (this.expectedState != state) {
                 string str = String.Format("{0}\n",  this.expectedState); 
                 byte[] snd = System.Text.Encoding.ASCII.GetBytes(str);
@@ -129,7 +149,8 @@ public class SerialInputManager : Singleton<SerialInputManager> {
             triple.velocity = velocity;
             triple.acceleration = acceleration;
             //print(triple.position + " " + triple.velocity + " " + triple.acceleration);
-            if (Globals.ToFireQueue.Count > 10)
+            //Store 5 values in the global time window/queue to detect the release to fire
+            if (Globals.ToFireQueue.Count > 5)
             {
                 Globals.ToFireQueue.Dequeue();
             }
@@ -140,6 +161,9 @@ public class SerialInputManager : Singleton<SerialInputManager> {
             //Debug.Log(msg);
         }
     }
+    /*
+        The state is set indirectly: here, we set the expected state only. The global hapkit state is updated as already explained above.
+    */
     public static void SetState(int state) {
         Instance.expectedState = state;
     }

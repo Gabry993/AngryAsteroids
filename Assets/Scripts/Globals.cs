@@ -1,4 +1,9 @@
 ﻿using System.Collections.Generic;
+
+/*
+Simple object to hold 3 float values.
+Should be refactoredand placed in its own file
+*/
 public struct Triple
 {
     public float position;
@@ -6,41 +11,41 @@ public struct Triple
     public float acceleration;
 }
 
+
+/*
+Here we have all global variables needed for the game.
+They are useful to provide system-wide information to many classes at the same time.
+We don't care about concurrent access as the behaviour is very simple (usually they are written only by one class) and in practice this work well for the game
+*/
 public class Globals
 {
-    private static int _mode;
-    private static int _hmode;
-    private static bool _exploded;
-    private static float _hapkitPosition;
-    private static bool _hapkit;
-    private static bool _releaseToFire;
-    private static Queue<Triple> _toFireQueue = new Queue<Triple>();
+    private static int _mode; //0 is catapult, 1 is rocket
+    private static int _hmode; //not needed anymore
+    private static bool _exploded;	//needed to avoid the game to reset before explosion animation occurs
+    private static float _hapkitPosition;	//position of the hapkit handle
+    private static bool _hapkit;	//true if we are playing with a Hapkit, flase if we want to play with the keyboar
+    private static bool _releaseToFire;	//true to enable release to fire function
+    private static Queue<Triple> _toFireQueue = new Queue<Triple>();	//Queue in which we store values used to detect the release to fire event
 
     public static Queue<Triple> ToFireQueue
     {
         get
         {
-            // Reads are usually simple
             return _toFireQueue;
         }
         set
         {
-            // You can add logic here for race conditions,
-            // or other measurements
-            _toFireQueue = value;
+        	_toFireQueue = value;
         }
     }
     public static bool ReleaseToFire
     {
         get
         {
-            // Reads are usually simple
-            return _releaseToFire;
+        	return _releaseToFire;
         }
         set
         {
-            // You can add logic here for race conditions,
-            // or other measurements
             _releaseToFire = value;
         }
     }
@@ -48,13 +53,10 @@ public class Globals
     {
         get
         {
-            // Reads are usually simple
             return _hapkit;
         }
         set
         {
-            // You can add logic here for race conditions,
-            // or other measurements
             _hapkit = value;
         }
     }
@@ -62,13 +64,10 @@ public class Globals
     {
         get
         {
-            // Reads are usually simple
             return _exploded;
         }
         set
         {
-            // You can add logic here for race conditions,
-            // or other measurements
             _exploded = value;
         }
     }
@@ -76,13 +75,10 @@ public class Globals
     {
         get
         {
-            // Reads are usually simple
             return _hapkitPosition;
         }
         set
         {
-            // You can add logic here for race conditions,
-            // or other measurements
             _hapkitPosition = value;
         }
     }
@@ -91,13 +87,10 @@ public class Globals
     {
         get
         {
-            // Reads are usually simple
             return _mode;
         }
         set
         {
-            // You can add logic here for race conditions,
-            // or other measurements
             _mode = value;
         }
     }
@@ -106,13 +99,10 @@ public class Globals
     {
         get
         {
-            // Reads are usually simple
-            return _hmode;
+             return _hmode;
         }
         set
         {
-            // You can add logic here for race conditions,
-            // or other measurements
             _hmode = value;
         }
     }

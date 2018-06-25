@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/*
+    This script is needed to count the damage that the target suffers and to update the sprite accordingly.
+    If the target gets killed, a "puff" animation is reproduced and as the object disappears
+*/
 public class TargetDamage : MonoBehaviour {
 
     public int hitPoints;
