@@ -3,7 +3,6 @@
 
 #define BAUD_RATE 2000000 //921600 // The maximum supported by Windows side
 
-#define RECVBUFSIZE 512
 
 static FILE uartout = {0};
 
@@ -56,11 +55,14 @@ struct Packet
   uint8_t state;
 };
 
+// Store all received data in this buffer.
+#define RECVBUFSIZE 10 
 char recvBuf[RECVBUFSIZE] = { '\0' };
 int  recvBytes = 0;
 bool string_complete = false;
+
 TimerOne timer_tck;
-TimerOne send_timer;
+
 Hapkit* hapkit = NULL;
 Packet *packet = new Packet();
 uint8_t state = 0;
@@ -77,6 +79,8 @@ void serialEvent() {
  }
 }
 
+// send position, velocity, acceleration, button state, game state to PC.
+// Floats are rounded to 5 significant digits.
 void snd() {
   Serial.print("Prm ");
   Serial.print(packet->position, 5);
@@ -91,18 +95,14 @@ void snd() {
   Serial.print("\n");
 }
 
-void snd_ack() {
-  Serial.print("Ok");
 
-  Serial.print("\n");
-}
-
+// Handle all received messages here. Since we are unable to receive too many bytes 
+// until haptic loop starts executing again, we limit received messages to two bytes -
+// one is the state (i.e. which force hapkit should exert) and the second one is newline.
 void parseMsg() {
-//Serial.print(recvBuf);
-  //Serial.print(recvBytes);
   recvBytes = 0;
-
-state = (recvBuf[0]) - '0';
+  state = (recvBuf[0]) - '0';
+  
   if (recvBuf[0] == 'P' && recvBuf[1] == '1')
   {
 
@@ -111,20 +111,12 @@ state = (recvBuf[0]) - '0';
 
     state = atoi(param1);
 
-
-    //snd_ack();
-
     Serial.print("Ok");
     Serial.print(state);
     Serial.print("\n");
 
     string_complete = false;
   }
-  else
-  {
-    //Serial.println("Unknown message");
-  }
-    //Serial.print("Ok\n");
 }
 
 int counter = 0;
@@ -144,8 +136,6 @@ void hapticLoop()
   if (hapkit->isCalibrated())
   {
     hapkit->update();
-
-//    force = hapkit->calcEffectsForce();
 
     // Handle buttons events
     button = digitalRead(buttonPin);
@@ -191,7 +181,6 @@ void setup()
 
   hapkit->calibrate();
 
-//  mode = 0;
 }
 
 float explosion_pos = NAN;
@@ -213,7 +202,7 @@ void loop()
     case 2:
       hapkit->setForce(-hapkit->getAcceleration() * 1.500 - hapkit->getVelocity() * 0.5); // 1500g - Rocket dynamics (angle)
       break;
-    case 3:
+    case 3: //explosion vibration
       if (isnan(explosion_pos))
       {
         explosion_pos = hapkit->getPosition();
@@ -229,12 +218,11 @@ void loop()
           hapkit->setForce(-dx * k_spring);
         }
       }
-       //hapkit->setForce(-5000.0);
        break;
-    case 5:
+    case 4: //not used
       hapkit->setForce(force); // Slingshot band with holds
       break;
-    case 6:
+    case 5: //not used
       hapkit->setForce(0.0); // Free space
       break;
 
